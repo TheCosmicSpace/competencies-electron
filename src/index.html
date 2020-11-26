@@ -2,26 +2,49 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Hello World!</title>
+    <title>Сompetencies</title>
+    <link 
+      rel="stylesheet" 
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" 
+      integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" 
+      crossorigin="anonymous" />
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css"
     />
     <link rel="stylesheet" href="index.css" />
     <script defer src="render.js"></script>
+    <script src="https://unpkg.com/docx@5.0.2/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
   </head>
   <body class="content">
-    <h1>⚡ Electron Screen Recorder</h1>
+    <h3 class="main-title">Выберите ваш excel фаил и укажите название предмета</h3>
 
-    <video></video>
-
-    <button id="startBtn" class="button is-primary">Start</button>
-    <button id="stopBtn" class="button is-warning">Stop</button>
-
-    <hr />
-
-    <button id="videoSelectBtn" class="button is-text">
-      Choose a Video Source
-    </button>
+    <form class="main-form">
+      <div class="field">
+        <div class="file is-centered is-boxed is-success has-name">
+          <label class="file-label">
+            <input class="file-input main-file-input" type="file" name="resume">
+            <span class="file-cta">
+              <span class="file-icon">
+                <i class="fas fa-upload"></i>
+              </span>
+              <span class="file-label">
+                Выбрать фаил…
+              </span>
+            </span>
+            <span class="file-name">
+              <!-- Screen Shot 2017-07-29 at 15.54.25.png -->
+            </span>
+          </label>
+        </div>
+      </div>
+      <div class="field">
+        <div class="control">
+          <input class="input is-success lesson-name" type="text" placeholder="Название предмета">
+        </div>
+      </div>
+      <button class="button is-success">Запустить программу</button>
+    </form>
   </body>
 </html>

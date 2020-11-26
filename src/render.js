@@ -1,108 +1,93 @@
-const { desktopCapturer, remote } = require('electron');
+const xlsxParser = require('xls-parser')
 
-const { writeFile } = require('fs');
+// Global vars
+const form = document.querySelector('.main-form')
+let file, searchLesson, competencies 
 
-const { dialog, Menu } = remote;
+// Init vars
+const init = () => {
+  file = null
+  searchLesson = ''
+  competencies = []
+}
+init()
 
-// Global state
-let mediaRecorder; // MediaRecorder instance to capture footage
-const recordedChunks = [];
+// Select file event 
+const onSelectFile = (event) => {
+  file = event.target.files ? event.target.files[0] : null
+  console.log(file)
+  if (!file) return alert('Выберите файл')
+  document.querySelector('.file-name').innerHTML = file.name
+}
+document.querySelector('.main-file-input').addEventListener('change', onSelectFile)
 
-// Buttons
-const videoElement = document.querySelector('video');
-
-const startBtn = document.getElementById('startBtn');
-startBtn.onclick = e => {
-  mediaRecorder.start();
-  startBtn.classList.add('is-danger');
-  startBtn.innerText = 'Recording';
-};
-
-const stopBtn = document.getElementById('stopBtn');
-
-stopBtn.onclick = e => {
-  mediaRecorder.stop();
-  startBtn.classList.remove('is-danger');
-  startBtn.innerText = 'Start';
-};
-
-const videoSelectBtn = document.getElementById('videoSelectBtn');
-videoSelectBtn.onclick = getVideoSources;
-
-// Get the available video sources
-async function getVideoSources() {
-  const inputSources = await desktopCapturer.getSources({
-    types: ['window', 'screen']
-  });
-
-  const videoOptionsMenu = Menu.buildFromTemplate(
-    inputSources.map(source => {
-      return {
-        label: source.name,
-        click: () => selectSource(source)
-      };
-    })
-  );
-
-
-  videoOptionsMenu.popup();
+const enterSearchLesson = () => {
+  const { value } = document.querySelector('.lesson-name')
+  console.log(value)
+  searchLesson = value
 }
 
-// Change the videoSource window to record
-async function selectSource(source) {
+const constructCompetencies = collection => {
+  return collection.reduce((acc, lesson) => {
+    const lessonName = lesson['Содержание'] || lesson['Наименование'] || ''
+    console.log(lessonName);
+    if (lessonName.toLowerCase().trim() === searchLesson.toLowerCase().trim() &&
+        lesson['Формируемые компетенции']) acc.push(lesson['Формируемые компетенции'])
+    return acc
+  }, [])
+}
 
-  videoSelectBtn.innerText = source.name;
+const generateWordDocument = competencies => {
+  if (!competencies.length) return alert('Ничего не найдено')
+  const doc = new docx.Document()
+  const children = competencies.map(item => {
+    return new docx.TextRun(item)
+  })
+  doc.addSection({
+    properties: {},
+    children: [
+      new docx.Paragraph({
+        children
+      })
+    ]
+  })
+  saveDocumentToFile(doc, searchLesson)
+}
 
-  const constraints = {
-    audio: false,
-    video: {
-      mandatory: {
-        chromeMediaSource: 'desktop',
-        chromeMediaSourceId: source.id
-      }
+// Save Word Document
+const saveDocumentToFile = (doc, fileName) => {
+  docx.Packer.toBlob(doc).then(blob => {
+    saveAs(blob, fileName)
+  })
+}
+
+// Check Sheets Lists 
+const checkSheet = parsedData => {
+  let competencies = []
+  for (const [key, value] of Object.entries(parsedData)) {
+    if (key.match(/компетенции/gi)) {
+      competencies = [...competencies, ...new Set(constructCompetencies(value))]
     }
-  };
-
-  // Create a Stream
-  const stream = await navigator.mediaDevices
-    .getUserMedia(constraints);
-
-  // Preview the source in a video element
-  videoElement.srcObject = stream;
-  videoElement.play();
-
-  // Create the Media Recorder
-  const options = { mimeType: 'video/webm; codecs=vp9' };
-  mediaRecorder = new MediaRecorder(stream, options);
-
-  // Register Event Handlers
-  mediaRecorder.ondataavailable = handleDataAvailable;
-  mediaRecorder.onstop = handleStop;
-
-  // Updates the UI
-}
-
-// Captures all recorded chunks
-function handleDataAvailable(e) {
-  console.log('video data available');
-  recordedChunks.push(e.data);
-}
-
-// Saves the video file on stop
-async function handleStop(e) {
-  const blob = new Blob(recordedChunks, {
-    type: 'video/webm; codecs=vp9'
-  });
-
-  const buffer = Buffer.from(await blob.arrayBuffer());
-
-  const { filePath } = await dialog.showSaveDialog({
-    buttonLabel: 'Save video',
-    defaultPath: `vid-${Date.now()}.webm`
-  });
-
-  if (filePath) {
-    writeFile(filePath, buffer, () => console.log('video saved successfully!'));
   }
-
+  generateWordDocument(competencies)
 }
+
+// Parse File
+const parseSelectedFile = () => {
+  xlsxParser
+    .onFileSelection(file)
+    .then(data => checkSheet(data))
+}
+
+// Event submit form
+form.addEventListener('submit', e => {
+  e.preventDefault()
+  
+  // Check needed
+  enterSearchLesson()
+  if (!file) return alert('Необходимо выбрать фаил')
+  if (!searchLesson) return alert('Необходимо ввести название предмета')
+  
+  // Start Parse
+  parseSelectedFile()
+})

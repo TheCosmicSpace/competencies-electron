@@ -1,6 +1,6 @@
 {
-  "name": "tron-forge",
-  "productName": "tron-forge",
+  "name": "nosu-competencies",
+  "productName": "nosu-competencies",
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": "src/index.js",
@@ -21,7 +21,7 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "tron_forge"
+            "name": "nosu_competencies"
           }
         },
         {
@@ -42,7 +42,8 @@
     }
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
+    "electron-squirrel-startup": "^1.0.0",
+    "xls-parser": "^3.1.0"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.50",

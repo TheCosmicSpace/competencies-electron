@@ -2,15 +2,24 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   padding: 0;
   margin: 0;
-}
-
-
-video {
-  width: 100%;
-  height: auto;
+  color: #fff;
 }
 
 body {
   text-align: center;
   padding-top: 20px;
+}
+.content {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #363636;
+}
+.content .main-title {
+  color: #fff;
+}
+.main-form {
+  margin-top: 50px;
 }
